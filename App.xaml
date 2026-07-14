@@ -1,0 +1,21 @@
+<Application x:Class="KeyViz.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             ShutdownMode="OnExplicitShutdown">
+    <Application.Resources>
+        <!-- wfchat dark palette, exposed as the only KeyViz color set. -->
+        <SolidColorBrush x:Key="Theme.AppBackgroundBrush" Color="#FF282C33" />
+        <SolidColorBrush x:Key="Theme.AppPanelBrush" Color="#E03B414D" />
+        <SolidColorBrush x:Key="Theme.AppSoftBrush" Color="#B82F343E" />
+        <SolidColorBrush x:Key="Theme.AppTextBrush" Color="#FFF2F5F8" />
+        <SolidColorBrush x:Key="Theme.MutedTextBrush" Color="#FFB8C0CA" />
+        <SolidColorBrush x:Key="Theme.AppBorderBrush" Color="#61747E8F" />
+        <SolidColorBrush x:Key="Theme.ActionBrush" Color="#FF282C33" />
+        <SolidColorBrush x:Key="Theme.ActionHoverBrush" Color="#FF2F343E" />
+        <SolidColorBrush x:Key="Theme.ActionBorderBrush" Color="#FF5D6675" />
+        <SolidColorBrush x:Key="Theme.InactiveControlBrush" Color="#662F343E" />
+        <SolidColorBrush x:Key="Theme.InactiveBorderBrush" Color="#33747E8F" />
+        <SolidColorBrush x:Key="Theme.InactiveTextBrush" Color="#99B8C0CA" />
+        <Color x:Key="Theme.ShadowColor">#FF0F172A</Color>
+    </Application.Resources>
+</Application>
