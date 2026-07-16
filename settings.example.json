@@ -1,6 +1,5 @@
 {
-  "maxTextLength": 20,
-  "maxSpecialKeys": 3,
+  "maxHistoryLength": 20,
   "showControls": false,
   "bubblePosition": "center"
 }

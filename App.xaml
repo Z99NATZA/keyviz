@@ -8,6 +8,7 @@
         <SolidColorBrush x:Key="Theme.AppPanelBrush" Color="#E03B414D" />
         <SolidColorBrush x:Key="Theme.AppSoftBrush" Color="#B82F343E" />
         <SolidColorBrush x:Key="Theme.AppTextBrush" Color="#FFF2F5F8" />
+        <SolidColorBrush x:Key="Theme.SpecialTextBrush" Color="#FF4ADE80" />
         <SolidColorBrush x:Key="Theme.MutedTextBrush" Color="#FFB8C0CA" />
         <SolidColorBrush x:Key="Theme.AppBorderBrush" Color="#61747E8F" />
         <SolidColorBrush x:Key="Theme.ActionBrush" Color="#FF282C33" />

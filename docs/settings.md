@@ -12,26 +12,23 @@ If the file does not exist, KeyViz creates it automatically with default values.
 
 ```json
 {
-  "maxTextLength": 20,
-  "maxSpecialKeys": 5,
+  "maxHistoryLength": 20,
   "showControls": true,
   "bubblePosition": "center"
 }
 ```
 
-### `maxTextLength`
+### `maxHistoryLength`
 
-The maximum number of recent characters retained across all text tokens. Supported values range from `0` to `200`, and typed spaces count as text characters. Set the value to `0` to hide text tokens.
-
-### `maxSpecialKeys`
-
-The maximum number of recent special tokens. Supported values range from `0` to `20`. Every chip counts as exactly one item, so `[Space]`, `[Shift]`, `[Ctrl]`, `[Enter]`, and `[Ctrl + S]` each count as one. Set the value to `0` to hide special tokens.
+The maximum combined character length retained across text and special tokens. Supported values range from `0` to `200`. Every displayed character counts toward the same limit: `Shift` counts as 5, `Ctrl + S` counts as 8, and a blank inserted by Space counts as 1. Special tokens are removed as complete labels when the oldest content exceeds the limit. Set the value to `0` to hide all tokens.
 
 Text and special tokens are rendered in event order on one line:
 
 ```text
-hello [Space] world [Ctrl + S] next
+hello world Ctrl + S next
 ```
+
+Special tokens use the same typography as ordinary text and are distinguished by green text. Token type affects presentation only, not history-length accounting.
 
 When the content exceeds the bubble width, KeyViz scrolls to the newest token without wrapping to another line.
 

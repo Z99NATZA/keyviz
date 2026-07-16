@@ -14,8 +14,7 @@ public partial class MainWindow : Window
 {
     private readonly HashSet<int> _pressedKeys = [];
     private readonly string _bubblePosition;
-    private readonly int _maxRollingCharacters;
-    private readonly int _maxSpecialKeyHistory;
+    private readonly int _maxHistoryLength;
     private readonly ObservableCollection<DisplayToken> _tokens = [];
     private readonly DispatcherTimer _hideTimer;
     private HwndSource? _windowSource;
@@ -31,8 +30,7 @@ public partial class MainWindow : Window
         InitializeComponent();
 
         _bubblePosition = settings.BubblePosition;
-        _maxRollingCharacters = settings.MaxTextLength;
-        _maxSpecialKeyHistory = settings.MaxSpecialKeys;
+        _maxHistoryLength = settings.MaxHistoryLength;
 
         _hideTimer = new DispatcherTimer
         {
@@ -145,7 +143,7 @@ public partial class MainWindow : Window
         AddSpecialKey(
             KeyLabelFormatter.FormatChord(_pressedKeys, virtualKey),
             replaceModifierPreview: _hasModifierPreview);
-        _hasModifierPreview = _maxSpecialKeyHistory > 0;
+        _hasModifierPreview = _maxHistoryLength > 0;
         RefreshDisplay();
     }
 
@@ -172,7 +170,6 @@ public partial class MainWindow : Window
         else if (virtualKey == 0x20)
         {
             AppendTextCharacter(' ');
-            AddSpecialKey("Space");
         }
         else if (KeyLabelFormatter.TryGetPrintableCharacter(
                      virtualKey,
@@ -207,7 +204,7 @@ public partial class MainWindow : Window
 
     private void AddSpecialKey(string label, bool replaceModifierPreview = false)
     {
-        if (_maxSpecialKeyHistory == 0)
+        if (_maxHistoryLength == 0)
         {
             return;
         }
@@ -218,22 +215,12 @@ public partial class MainWindow : Window
         }
 
         _tokens.Add(new DisplayToken(label, IsSpecial: true));
-        while (_tokens.Count(token => token.IsSpecial) > _maxSpecialKeyHistory)
-        {
-            var oldestSpecialIndex = FindFirstSpecialTokenIndex();
-            if (oldestSpecialIndex < 0)
-            {
-                break;
-            }
-
-            _tokens.RemoveAt(oldestSpecialIndex);
-            MergeAdjacentTextTokens();
-        }
+        TrimHistory();
     }
 
     private void AppendTextCharacter(char character)
     {
-        if (_maxRollingCharacters == 0)
+        if (_maxHistoryLength == 0)
         {
             return;
         }
@@ -248,7 +235,7 @@ public partial class MainWindow : Window
             _tokens.Add(new DisplayToken(character.ToString(), IsSpecial: false));
         }
 
-        TrimTextCharacters();
+        TrimHistory();
     }
 
     private void RemoveLastTextCharacter()
@@ -274,21 +261,14 @@ public partial class MainWindow : Window
         }
     }
 
-    private void TrimTextCharacters()
+    private void TrimHistory()
     {
-        var excess = _tokens.Where(token => !token.IsSpecial).Sum(token => token.Value.Length)
-            - _maxRollingCharacters;
+        var excess = _tokens.Sum(token => token.Value.Length) - _maxHistoryLength;
 
         for (var index = 0; index < _tokens.Count && excess > 0;)
         {
             var token = _tokens[index];
-            if (token.IsSpecial)
-            {
-                index++;
-                continue;
-            }
-
-            if (token.Value.Length <= excess)
+            if (token.IsSpecial || token.Value.Length <= excess)
             {
                 excess -= token.Value.Length;
                 _tokens.RemoveAt(index);
@@ -298,19 +278,8 @@ public partial class MainWindow : Window
             _tokens[index] = token with { Value = token.Value[excess..] };
             excess = 0;
         }
-    }
 
-    private int FindFirstSpecialTokenIndex()
-    {
-        for (var index = 0; index < _tokens.Count; index++)
-        {
-            if (_tokens[index].IsSpecial)
-            {
-                return index;
-            }
-        }
-
-        return -1;
+        MergeAdjacentTextTokens();
     }
 
     private void MergeAdjacentTextTokens()

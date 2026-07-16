@@ -8,8 +8,9 @@ Shared colors live in `App.xaml` under semantic resource keys:
 | --- | --- | --- |
 | `Theme.AppBackgroundBrush` | `#282c33` | Base application color |
 | `Theme.AppPanelBrush` | `rgb(59 65 77 / 0.88)` | Overlay and control-panel surfaces |
-| `Theme.AppSoftBrush` | `rgb(47 52 62 / 0.72)` | Special-key chips and ordinary controls |
+| `Theme.AppSoftBrush` | `rgb(47 52 62 / 0.72)` | Ordinary control surfaces |
 | `Theme.AppTextBrush` | `#f2f5f8` | Primary text |
+| `Theme.SpecialTextBrush` | `#4ade80` | Special-key text |
 | `Theme.MutedTextBrush` | `#b8c0ca` | Secondary text |
 | `Theme.AppBorderBrush` | `rgb(116 126 143 / 0.38)` | Surface borders |
 | `Theme.ActionBrush` | `#282c33` | Pressed-button background |
@@ -24,7 +25,7 @@ Component dimensions, spacing, corner radii, and states are defined directly in 
 Surface guidelines:
 
 - The overlay uses the app panel, app border, and a dark shadow.
-- Special-key chips inserted between text tokens use the app-soft surface and app border.
+- Special keys inserted between text tokens use the same typography as primary text and are colored green.
 - Show/Hide uses one local shared button style in `ControlWindow.xaml`.
 - The active button uses the action-hover background and action border.
 - The inactive button uses lower-opacity background, border, and text colors.

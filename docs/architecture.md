@@ -40,7 +40,7 @@ A transparent WPF overlay that stays above ordinary windows and does not accept 
 - `WS_EX_NOACTIVATE`
 - `WS_EX_TOOLWINDOW`
 
-Text and special keys are stored as ordered tokens and rendered on one line, for example `text [Space] text [Ctrl + S]`. Total text characters, special-token count, and the left/center/right position are read from `settings.json`. Every special token counts as one item regardless of label length. When the content exceeds the bubble width, the view scrolls to the newest token. The panel fades after three seconds without a key-down event.
+Text and special keys are stored as ordered tokens and rendered on one line, for example `text text Ctrl + S`. Pressing Space inserts an ordinary blank character. Special tokens use the same typography as ordinary text but are colored green. `maxHistoryLength` limits the combined displayed character count across both token types, so `Shift` contributes 5 characters and `Ctrl + S` contributes 8. Old text can be trimmed by character, while a special token is removed as a complete label. The horizontal position is also read from `settings.json`. When the content exceeds the bubble width, the view scrolls to the newest token. The panel fades after three seconds without a key-down event.
 
 ### `ControlWindow`
 

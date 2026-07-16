@@ -5,13 +5,10 @@ namespace KeyViz.Services;
 
 internal sealed record AppSettings
 {
-    internal const int DefaultMaxTextLength = 20;
-    internal const int DefaultMaxSpecialKeys = 5;
+    internal const int DefaultMaxHistoryLength = 20;
     internal const string DefaultBubblePosition = "center";
 
-    public int MaxTextLength { get; init; } = DefaultMaxTextLength;
-
-    public int MaxSpecialKeys { get; init; } = DefaultMaxSpecialKeys;
+    public int MaxHistoryLength { get; init; } = DefaultMaxHistoryLength;
 
     public bool ShowControls { get; init; } = true;
 
@@ -25,8 +22,7 @@ internal sealed record AppSettings
     {
         return this with
         {
-            MaxTextLength = Math.Clamp(MaxTextLength, 0, 200),
-            MaxSpecialKeys = Math.Clamp(MaxSpecialKeys, 0, 20),
+            MaxHistoryLength = Math.Clamp(MaxHistoryLength, 0, 200),
             BubblePosition = BubblePosition?.Trim().ToLowerInvariant() switch
             {
                 "left" => "left",

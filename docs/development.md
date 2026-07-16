@@ -45,8 +45,8 @@ Manual checks:
 2. Press shortcuts with multiple modifiers, such as `Ctrl + Shift + S`.
 3. Confirm that the overlay does not take focus and remains click-through.
 4. Confirm that text and special tokens appear in event order on one line.
-5. Confirm that total text characters follow `maxTextLength`.
-6. Confirm that Space, Shift, Ctrl, shortcuts, and other special keys follow `maxSpecialKeys`, with each chip counting as one.
+5. Confirm that the combined character length of text and special tokens follows `maxHistoryLength`.
+6. Confirm that Space appears as an ordinary blank character and special tokens remain complete when old content is trimmed.
 7. Set `showControls` to both `true` and `false` and verify the Show/Hide controls.
 8. Set `bubblePosition` to `left`, `center`, and `right` and verify horizontal placement.
 9. Verify Show, Hide, and Exit from the System Tray.
