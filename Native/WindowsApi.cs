@@ -50,6 +50,29 @@ internal static class WindowsApi
         internal uint ExtraInformation;
     }
 
+    [StructLayout(LayoutKind.Sequential)]
+    internal struct Rectangle
+    {
+        internal int Left;
+        internal int Top;
+        internal int Right;
+        internal int Bottom;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    internal struct GuiThreadInfo
+    {
+        internal uint Size;
+        internal uint Flags;
+        internal IntPtr ActiveWindow;
+        internal IntPtr FocusedWindow;
+        internal IntPtr CaptureWindow;
+        internal IntPtr MenuOwnerWindow;
+        internal IntPtr MoveSizeWindow;
+        internal IntPtr CaretWindow;
+        internal Rectangle CaretRectangle;
+    }
+
     [DllImport("user32.dll", SetLastError = true)]
     [return: MarshalAs(UnmanagedType.Bool)]
     internal static extern bool RegisterRawInputDevices(
@@ -70,6 +93,33 @@ internal static class WindowsApi
 
     [DllImport("user32.dll")]
     internal static extern short GetKeyState(int virtualKey);
+
+    [DllImport("user32.dll")]
+    internal static extern IntPtr GetForegroundWindow();
+
+    [DllImport("user32.dll")]
+    internal static extern uint GetWindowThreadProcessId(
+        IntPtr windowHandle,
+        IntPtr processId);
+
+    [DllImport("user32.dll")]
+    internal static extern IntPtr GetKeyboardLayout(uint threadId);
+
+    [DllImport("user32.dll", SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    internal static extern bool GetGUIThreadInfo(
+        uint threadId,
+        ref GuiThreadInfo threadInfo);
+
+    [DllImport("user32.dll", CharSet = CharSet.Unicode)]
+    internal static extern int ToUnicodeEx(
+        uint virtualKey,
+        uint scanCode,
+        byte[] keyboardState,
+        [Out] char[] buffer,
+        int bufferLength,
+        uint flags,
+        IntPtr keyboardLayout);
 
     [DllImport("kernel32.dll")]
     internal static extern IntPtr GetConsoleWindow();

@@ -14,8 +14,8 @@ Windows Raw Input (`WM_INPUT`)
 RawKeyboardInput
         ↓
 MainWindow
-        ↓
-KeyLabelFormatter
+        ├─ KeyboardTextTranslator → foreground keyboard layout → Unicode text
+        └─ KeyLabelFormatter → special-key and shortcut labels
         ↓
 Ordered display tokens (`Text` / `Special`)
         ↓
@@ -26,11 +26,19 @@ WPF overlay (`MainWindow`)
 
 ### `RawKeyboardInput`
 
-Registers a keyboard device through Win32 Raw Input with `RIDEV_INPUTSINK`, allowing the window to receive `WM_INPUT` while another application is in the foreground. KeyViz reads key-down and key-up data without modifying or blocking input delivered to other applications.
+Registers a keyboard device through Win32 Raw Input with `RIDEV_INPUTSINK`, allowing the window to receive `WM_INPUT` while another application is in the foreground. KeyViz reads virtual keys, scan codes, and key-down/key-up state without modifying or blocking input delivered to other applications.
+
+### `KeyboardTextTranslator`
+
+Resolves the input locale of the caret or keyboard-focused control's GUI thread for each printable key and calls `ToUnicodeEx` with the Raw Input virtual key, scan code, and current modifier/toggle state. The top-level foreground window and KeyViz thread provide fallbacks when Windows does not expose a focused control. Resolving the control thread is required for hosted editors such as modern Notepad, where the top-level window and text control can use different input locales. Translation uses the non-mutating keyboard-state flag available on supported Windows versions. This allows English US, Thai Kedmanee, Thai Pattachote, and other direct keyboard layouts to follow the input language selected in the active application.
 
 ### `KeyLabelFormatter`
 
-Converts virtual-key codes into readable labels, combines active modifiers into shortcuts such as `Ctrl + Shift + S`, and converts letters, numbers, and common punctuation into text. Printable-character conversion currently follows an English keyboard layout rather than the active Windows keyboard layout.
+Converts non-printable virtual keys into readable labels and combines active modifiers into shortcuts such as `Ctrl + Shift + S`. Printable text conversion belongs to `KeyboardTextTranslator`.
+
+### `DisplayHistory`
+
+Stores ordered text and special tokens, appends translated Unicode strings, removes the last Unicode code point from the newest text token on Backspace, and applies the shared history-length limit. Text can be trimmed by code point; special labels are removed atomically.
 
 ### `MainWindow`
 
@@ -40,7 +48,7 @@ A transparent WPF overlay that stays above ordinary windows and does not accept 
 - `WS_EX_NOACTIVATE`
 - `WS_EX_TOOLWINDOW`
 
-Text and special keys are stored as ordered tokens and rendered on one line, for example `text text Ctrl + S`. Pressing Space inserts an ordinary blank character. Special tokens use the same typography as ordinary text but are colored green. `maxHistoryLength` limits the combined displayed character count across both token types, so `Shift` contributes 5 characters and `Ctrl + S` contributes 8. Old text can be trimmed by character, while a special token is removed as a complete label. The horizontal position is also read from `settings.json`. When the content exceeds the bubble width, the view scrolls to the newest token. The panel fades after three seconds without a key-down event.
+Text and special keys are rendered on one line, for example `hello ที่ Ctrl + S`. Pressing Space inserts an ordinary blank character. Special tokens use the same typography as ordinary text but are colored green. Thai-capable fallback fonts allow vowels and tone marks to compose in the same text run. `maxHistoryLength` limits the combined Unicode code-point count across both token types, so `ที่` contributes 3, `Shift` contributes 5, and `Ctrl + S` contributes 8. The horizontal position is also read from `settings.json`. When the content exceeds the bubble width, the view scrolls to the newest token. The panel fades after three seconds without a key-down event.
 
 ### `ControlWindow`
 
@@ -60,4 +68,4 @@ Reads `%LocalAppData%\KeyViz\settings.json` at startup and creates it with defau
 - Secure Desktop surfaces such as UAC prompts are not captured or overlaid.
 - Exclusive-fullscreen games may appear above the overlay; borderless windowed mode is more reliable.
 - The primary work area is used for placement. Monitor selection and vertical positioning are not configurable.
-- Printable-character conversion follows English virtual-key positions and may not match Thai or other keyboard layouts, dead keys, or input method editors.
+- Direct keyboard layouts use the foreground application's active input locale. Dead-key composition and IME composition such as Chinese, Japanese, and Korean input are not supported.

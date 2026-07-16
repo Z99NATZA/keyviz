@@ -51,64 +51,6 @@ internal static class KeyLabelFormatter
             || WindowsKeys.Any(pressedKeys.Contains);
     }
 
-    internal static bool IsShiftPressed(IReadOnlySet<int> pressedKeys)
-    {
-        return ShiftKeys.Any(pressedKeys.Contains);
-    }
-
-    internal static bool TryGetPrintableCharacter(
-        int key,
-        bool shiftPressed,
-        bool capsLockEnabled,
-        out char character)
-    {
-        if (key is >= 0x41 and <= 0x5A)
-        {
-            var upperCase = shiftPressed ^ capsLockEnabled;
-            character = upperCase ? (char)key : char.ToLowerInvariant((char)key);
-            return true;
-        }
-
-        if (key is >= 0x30 and <= 0x39)
-        {
-            character = shiftPressed
-                ? ")!@#$%^&*("[key - 0x30]
-                : (char)key;
-            return true;
-        }
-
-        if (key is >= 0x60 and <= 0x69)
-        {
-            character = (char)('0' + key - 0x60);
-            return true;
-        }
-
-        var printable = key switch
-        {
-            0x20 => ' ',
-            0x6A => '*',
-            0x6B => '+',
-            0x6D => '-',
-            0x6E => '.',
-            0x6F => '/',
-            0xBA => shiftPressed ? ':' : ';',
-            0xBB => shiftPressed ? '+' : '=',
-            0xBC => shiftPressed ? '<' : ',',
-            0xBD => shiftPressed ? '_' : '-',
-            0xBE => shiftPressed ? '>' : '.',
-            0xBF => shiftPressed ? '?' : '/',
-            0xC0 => shiftPressed ? '~' : '`',
-            0xDB => shiftPressed ? '{' : '[',
-            0xDC => shiftPressed ? '|' : '\\',
-            0xDD => shiftPressed ? '}' : ']',
-            0xDE => shiftPressed ? '"' : '\'',
-            _ => '\0'
-        };
-
-        character = printable;
-        return printable != '\0';
-    }
-
     internal static string GetKeyLabel(int key)
     {
         if (key is >= 0x41 and <= 0x5A)

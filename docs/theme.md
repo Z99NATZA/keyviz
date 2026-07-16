@@ -25,6 +25,7 @@ Component dimensions, spacing, corner radii, and states are defined directly in 
 Surface guidelines:
 
 - The overlay uses the app panel, app border, and a dark shadow.
+- Text uses a monospaced-first font stack with `Leelawadee UI`, `Tahoma`, and `Segoe UI` fallbacks for Thai glyph shaping.
 - Special keys inserted between text tokens use the same typography as primary text and are colored green.
 - Show/Hide uses one local shared button style in `ControlWindow.xaml`.
 - The active button uses the action-hover background and action border.

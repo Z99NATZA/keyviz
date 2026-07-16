@@ -1,5 +1,4 @@
 using System.ComponentModel;
-using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Interop;
 using System.Windows.Media.Animation;
@@ -14,8 +13,7 @@ public partial class MainWindow : Window
 {
     private readonly HashSet<int> _pressedKeys = [];
     private readonly string _bubblePosition;
-    private readonly int _maxHistoryLength;
-    private readonly ObservableCollection<DisplayToken> _tokens = [];
+    private readonly DisplayHistory _history;
     private readonly DispatcherTimer _hideTimer;
     private HwndSource? _windowSource;
     private RawKeyboardInput? _keyboardInput;
@@ -30,14 +28,14 @@ public partial class MainWindow : Window
         InitializeComponent();
 
         _bubblePosition = settings.BubblePosition;
-        _maxHistoryLength = settings.MaxHistoryLength;
+        _history = new DisplayHistory(settings.MaxHistoryLength);
 
         _hideTimer = new DispatcherTimer
         {
             Interval = TimeSpan.FromSeconds(3)
         };
         _hideTimer.Tick += HideTimerOnTick;
-        TokenItemsControl.ItemsSource = _tokens;
+        TokenItemsControl.ItemsSource = _history.Tokens;
         Loaded += (_, _) => PositionOverlay();
     }
 
@@ -123,7 +121,7 @@ public partial class MainWindow : Window
                 }
                 else
                 {
-                    ProcessVisibleKey(e.VirtualKey);
+                    ProcessVisibleKey(e);
                 }
             }
         }
@@ -140,51 +138,51 @@ public partial class MainWindow : Window
     private void ProcessModifierKey(int virtualKey)
     {
         PrepareForInput();
-        AddSpecialKey(
+        _history.AddSpecial(
             KeyLabelFormatter.FormatChord(_pressedKeys, virtualKey),
-            replaceModifierPreview: _hasModifierPreview);
-        _hasModifierPreview = _maxHistoryLength > 0;
+            replaceLastSpecial: _hasModifierPreview);
+        _hasModifierPreview = _history.CanStoreTokens;
         RefreshDisplay();
     }
 
-    private void ProcessVisibleKey(int virtualKey)
+    private void ProcessVisibleKey(KeyboardInputEvent keyboardEvent)
     {
         PrepareForInput();
+        var virtualKey = keyboardEvent.VirtualKey;
 
         if (KeyLabelFormatter.HasShortcutModifier(_pressedKeys))
         {
-            AddSpecialKey(
+            _history.AddSpecial(
                 KeyLabelFormatter.FormatChord(_pressedKeys, virtualKey),
-                replaceModifierPreview: _hasModifierPreview);
+                replaceLastSpecial: _hasModifierPreview);
             _hasModifierPreview = false;
         }
         else if (virtualKey == 0x08)
         {
-            RemoveLastTextCharacter();
-            AddSpecialKey("Backspace");
+            _history.RemoveLastTextCodePoint();
+            _history.AddSpecial("Backspace");
         }
         else if (virtualKey == 0x0D)
         {
-            AddSpecialKey("Enter");
+            _history.AddSpecial("Enter");
         }
         else if (virtualKey == 0x20)
         {
-            AppendTextCharacter(' ');
+            _history.AppendText(" ");
         }
-        else if (KeyLabelFormatter.TryGetPrintableCharacter(
-                     virtualKey,
-                     KeyLabelFormatter.IsShiftPressed(_pressedKeys),
-                     IsCapsLockEnabled(),
-                     out var character))
+        else if (KeyboardTextTranslator.TryTranslate(
+                     keyboardEvent,
+                     _pressedKeys,
+                     out var text))
         {
-            AppendTextCharacter(character);
+            _history.AppendText(text);
             _hasModifierPreview = false;
         }
         else
         {
-            AddSpecialKey(
+            _history.AddSpecial(
                 KeyLabelFormatter.FormatChord(_pressedKeys, virtualKey),
-                replaceModifierPreview: _hasModifierPreview);
+                replaceLastSpecial: _hasModifierPreview);
         }
 
         _hasModifierPreview = false;
@@ -202,107 +200,9 @@ public partial class MainWindow : Window
         _startFreshGroup = false;
     }
 
-    private void AddSpecialKey(string label, bool replaceModifierPreview = false)
-    {
-        if (_maxHistoryLength == 0)
-        {
-            return;
-        }
-
-        if (replaceModifierPreview && _tokens.Count > 0 && _tokens[^1].IsSpecial)
-        {
-            _tokens.RemoveAt(_tokens.Count - 1);
-        }
-
-        _tokens.Add(new DisplayToken(label, IsSpecial: true));
-        TrimHistory();
-    }
-
-    private void AppendTextCharacter(char character)
-    {
-        if (_maxHistoryLength == 0)
-        {
-            return;
-        }
-
-        if (_tokens.Count > 0 && !_tokens[^1].IsSpecial)
-        {
-            var lastToken = _tokens[^1];
-            _tokens[^1] = lastToken with { Value = lastToken.Value + character };
-        }
-        else
-        {
-            _tokens.Add(new DisplayToken(character.ToString(), IsSpecial: false));
-        }
-
-        TrimHistory();
-    }
-
-    private void RemoveLastTextCharacter()
-    {
-        for (var index = _tokens.Count - 1; index >= 0; index--)
-        {
-            var token = _tokens[index];
-            if (token.IsSpecial)
-            {
-                continue;
-            }
-
-            if (token.Value.Length == 1)
-            {
-                _tokens.RemoveAt(index);
-            }
-            else
-            {
-                _tokens[index] = token with { Value = token.Value[..^1] };
-            }
-
-            return;
-        }
-    }
-
-    private void TrimHistory()
-    {
-        var excess = _tokens.Sum(token => token.Value.Length) - _maxHistoryLength;
-
-        for (var index = 0; index < _tokens.Count && excess > 0;)
-        {
-            var token = _tokens[index];
-            if (token.IsSpecial || token.Value.Length <= excess)
-            {
-                excess -= token.Value.Length;
-                _tokens.RemoveAt(index);
-                continue;
-            }
-
-            _tokens[index] = token with { Value = token.Value[excess..] };
-            excess = 0;
-        }
-
-        MergeAdjacentTextTokens();
-    }
-
-    private void MergeAdjacentTextTokens()
-    {
-        for (var index = 0; index < _tokens.Count - 1;)
-        {
-            if (!_tokens[index].IsSpecial && !_tokens[index + 1].IsSpecial)
-            {
-                _tokens[index] = _tokens[index] with
-                {
-                    Value = _tokens[index].Value + _tokens[index + 1].Value
-                };
-                _tokens.RemoveAt(index + 1);
-                continue;
-            }
-
-            index++;
-        }
-    }
-
     private void RefreshDisplay()
     {
-        if (_tokens.Count == 0)
+        if (_history.Tokens.Count == 0)
         {
             DisplayPanel.BeginAnimation(OpacityProperty, null);
             DisplayPanel.Opacity = 0;
@@ -331,13 +231,8 @@ public partial class MainWindow : Window
 
     private void ClearDisplay()
     {
-        _tokens.Clear();
+        _history.Clear();
         _hasModifierPreview = false;
-    }
-
-    private static bool IsCapsLockEnabled()
-    {
-        return (WindowsApi.GetKeyState(0x14) & 0x0001) != 0;
     }
 
     private void PositionOverlay()

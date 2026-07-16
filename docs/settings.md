@@ -20,12 +20,12 @@ If the file does not exist, KeyViz creates it automatically with default values.
 
 ### `maxHistoryLength`
 
-The maximum combined character length retained across text and special tokens. Supported values range from `0` to `200`. Every displayed character counts toward the same limit: `Shift` counts as 5, `Ctrl + S` counts as 8, and a blank inserted by Space counts as 1. Special tokens are removed as complete labels when the oldest content exceeds the limit. Set the value to `0` to hide all tokens.
+The maximum combined Unicode code-point count retained across text and special tokens. Supported values range from `0` to `200`. `ที่` counts as 3, `Shift` counts as 5, `Ctrl + S` counts as 8, and a blank inserted by Space counts as 1. Text is trimmed by code point, while special tokens are removed as complete labels. Set the value to `0` to hide all tokens.
 
 Text and special tokens are rendered in event order on one line:
 
 ```text
-hello world Ctrl + S next
+hello ที่ Ctrl + S next
 ```
 
 Special tokens use the same typography as ordinary text and are distinguished by green text. Token type affects presentation only, not history-length accounting.

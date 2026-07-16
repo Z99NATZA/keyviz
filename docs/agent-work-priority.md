@@ -20,13 +20,14 @@ For every task:
 
 Then read only the documents relevant to the task:
 
-- Settings or history limits: `docs/settings.md`, `settings.example.json`, and
-  `Services/SettingsService.cs`.
+- Settings or history limits: `docs/settings.md`, `settings.example.json`,
+  `Services/SettingsService.cs`, `Models/DisplayHistory.cs`, and
+  `Services/UnicodeText.cs`.
 - Overlay rendering or colors: `docs/theme.md`, `App.xaml`, and
   `MainWindow.xaml`.
 - Keyboard capture or key translation: `Native/WindowsApi.cs`,
-  `Services/RawKeyboardInput.cs`, `Services/KeyLabelFormatter.cs`, and
-  `MainWindow.xaml.cs`.
+  `Services/RawKeyboardInput.cs`, `Services/KeyboardTextTranslator.cs`,
+  `Services/KeyLabelFormatter.cs`, and `MainWindow.xaml.cs`.
 - Application lifecycle, controls, or tray behavior: `App.xaml.cs` and
   `ControlWindow.xaml(.cs)`.
 
@@ -56,18 +57,18 @@ Then read only the documents relevant to the task:
 - Preserve the privacy boundary: keyboard events and display tokens stay in
   process memory and are not logged, persisted, or sent over a network.
 - Keep text and special tokens in event order. `IsSpecial` controls presentation
-  and atomic trimming; `maxHistoryLength` counts the displayed characters of
-  both token types under one limit.
+  and atomic trimming; `maxHistoryLength` counts the Unicode code points of both
+  token types under one limit.
 - Plain Space is an ordinary blank character. Special tokens use the same
   typography as text, render in green, and are removed as complete labels when
   history is trimmed.
 - Update `settings.example.json` and `docs/settings.md` whenever the settings
   contract changes. Update `docs/theme.md` whenever shared visual resources or
   rendering rules change.
-- The project currently has no automated test project. Run
-  `dotnet format --verify-no-changes` and `dotnet build -c Release` for every code
-  change, then perform the relevant manual checks from `docs/development.md`.
-  Run the documented publish command when distribution behavior changes.
+- Run `dotnet format --verify-no-changes`, the dependency-free automated test
+  runner, and `dotnet build -c Release` for every code change, then perform the
+  relevant manual checks from `docs/development.md`. Run the documented publish
+  command when distribution behavior changes.
 - Do not introduce a backend, network communication, persistent key logging, or
   an external dependency unless the active scope explicitly requires it.
 - Clear completed task details and restore the default placeholders so this
