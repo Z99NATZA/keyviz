@@ -4,7 +4,7 @@
 
 รองรับ Windows 10/11 และต้องติดตั้ง [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0)
 
-```text
+```bash
 # เปิด Command Prompt, PowerShell หรือ terminal อื่นที่โฟลเดอร์โปรเจกต์ แล้วรัน
 
 dotnet restore
@@ -29,7 +29,7 @@ bin\Release\net10.0-windows\win-x64\publish\KeyViz.exe
 
 KeyViz supports Windows 10/11 and requires the [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0).
 
-```text
+```bash
 # Open Command Prompt, PowerShell, or another terminal in the project directory, then run
 
 dotnet restore
