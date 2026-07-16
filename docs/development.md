@@ -57,7 +57,8 @@ Manual checks:
 9. Confirm that the combined Unicode code-point count follows `maxHistoryLength`, Space counts as one, and special tokens remain complete when old content is trimmed.
 10. Set `showControls` to both `true` and `false` and verify the Show/Hide controls.
 11. Set `bubblePosition` to `left`, `center`, and `right` and verify horizontal placement.
-12. Verify Show, Hide, and Exit from the System Tray.
+12. Confirm that the bubble and Show/Hide controls share the same 32-pixel bottom work-area margin.
+13. Verify Show, Hide, and Exit from the System Tray.
 
 ## Current Scope
 

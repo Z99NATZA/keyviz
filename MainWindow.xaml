@@ -18,7 +18,7 @@
                 MaxWidth="560"
                 Padding="20,14"
                 HorizontalAlignment="Center"
-                VerticalAlignment="Center"
+                VerticalAlignment="Bottom"
                 Background="{StaticResource Theme.AppPanelBrush}"
                 BorderBrush="{StaticResource Theme.AppBorderBrush}"
                 BorderThickness="1"

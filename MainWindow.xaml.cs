@@ -250,7 +250,7 @@ public partial class MainWindow : Window
         var maximumLeft = Math.Max(minimumLeft, workArea.Right - ActualWidth - edgeMargin);
 
         Left = Math.Clamp(desiredLeft, minimumLeft, maximumLeft);
-        Top = workArea.Bottom - ActualHeight - 48;
+        Top = workArea.Bottom - ActualHeight - edgeMargin;
     }
 
     private void ApplyOverlayWindowStyles()
