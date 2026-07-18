@@ -21,7 +21,7 @@ internal static class KeyLabelFormatter
             labels.Add(GetKeyLabel(currentKey));
         }
 
-        return labels.Count > 0 ? string.Join(" + ", labels) : GetKeyLabel(currentKey);
+        return labels.Count > 0 ? string.Join("+", labels) : GetKeyLabel(currentKey);
     }
 
     private static void AddModifier(

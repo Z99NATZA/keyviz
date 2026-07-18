@@ -50,7 +50,7 @@ Manual checks:
 2. Select Thai Kedmanee and type `ที่` in all three applications; repeat with Thai Pattachote. This verifies both hosted Notepad text controls and conventional foreground-window layout resolution.
 3. Type `hello ที่` and confirm that Thai vowels and tone marks compose without clipping.
 4. Switch layouts with `Win + Space` and `Alt + Shift`; confirm that the next printable key uses the newly selected layout.
-5. Test Shift, Caps Lock, repeated keys, arrow keys, function keys, and `Ctrl + Shift + S`.
+5. Test Shift, Caps Lock, repeated keys, arrow keys, function keys, and `Ctrl+Shift+S`.
 6. Press Backspace after `ที่` and confirm the text portion changes through `ที`, `ท`, and empty while Backspace remains a special token.
 7. Confirm that the overlay does not take focus and remains click-through.
 8. Confirm that text and special tokens appear in event order on one line.

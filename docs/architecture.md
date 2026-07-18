@@ -34,7 +34,7 @@ Resolves the input locale of the caret or keyboard-focused control's GUI thread 
 
 ### `KeyLabelFormatter`
 
-Converts non-printable virtual keys into readable labels and combines active modifiers into shortcuts such as `Ctrl + Shift + S`. Printable text conversion belongs to `KeyboardTextTranslator`.
+Converts non-printable virtual keys into readable labels and combines active modifiers into shortcuts such as `Ctrl+Shift+S`. Printable text conversion belongs to `KeyboardTextTranslator`.
 
 ### `DisplayHistory`
 
@@ -48,7 +48,7 @@ A transparent WPF overlay that stays above ordinary windows and does not accept 
 - `WS_EX_NOACTIVATE`
 - `WS_EX_TOOLWINDOW`
 
-Text and special keys are rendered on one line, for example `hello ที่ Ctrl + S`. Pressing Space inserts an ordinary blank character. Special tokens use the same typography as ordinary text but are colored green. Thai-capable fallback fonts allow vowels and tone marks to compose in the same text run. `maxHistoryLength` limits the combined Unicode code-point count across both token types, so `ที่` contributes 3, `Shift` contributes 5, and `Ctrl + S` contributes 8. The horizontal position is read from `settings.json`; the bubble's bottom edge stays 32 pixels above the work-area bottom, aligned with the Show/Hide controls. When the content exceeds the bubble width, the view scrolls to the newest token. The panel fades after three seconds without a key-down event.
+Text and special keys are rendered on one line, for example `hello ที่ Ctrl+S`. Pressing Space inserts an ordinary blank character. Consecutive copies of the same special key are collapsed into a total press counter such as `Backspace*2`, `Backspace*3`, and so on. Special tokens use the same typography as ordinary text but are colored green. Thai-capable fallback fonts allow vowels and tone marks to compose in the same text run. `maxHistoryLength` limits the combined Unicode code-point count across both token types, so `ที่` contributes 3, `Shift` contributes 5, and `Ctrl+S` contributes 6. The horizontal position is read from `settings.json`; the bubble's bottom edge stays 32 pixels above the work-area bottom, aligned with the Show/Hide controls. When the content exceeds the bubble width, the view scrolls to the newest token. The panel fades after three seconds without a key-down event.
 
 ### `ControlWindow`
 

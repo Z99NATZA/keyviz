@@ -10,6 +10,10 @@ var tests = new (string Name, Action Run)[]
     ("counts text and special labels under one limit", CountCombinedHistory),
     ("trims special labels atomically", TrimSpecialLabelsAtomically),
     ("replaces modifier previews", ReplaceModifierPreviews),
+    ("formats chords without spaces", FormatChordsWithoutSpaces),
+    ("counts repeated special keys", CountRepeatedSpecialKeys),
+    ("does not combine separated special keys", DoNotCombineSeparatedSpecialKeys),
+    ("preserves earlier repeats when replacing previews", PreserveRepeatsWhenReplacingPreviews),
     ("translates English US through Windows", TranslateEnglishUs),
     ("translates Shift state through Windows", TranslateShiftState),
     ("translates Thai Kedmanee through Windows", TranslateThaiKedmanee),
@@ -90,11 +94,60 @@ static void ReplaceModifierPreviews()
 {
     var history = new DisplayHistory(20);
     history.AddSpecial("Ctrl");
-    history.AddSpecial("Ctrl + S", replaceLastSpecial: true);
+    history.AddSpecial("Ctrl+S", replaceLastSpecial: true);
 
     Equal(1, history.Tokens.Count);
-    Equal("Ctrl + S", history.Tokens.Single().Value);
-    Equal(8, history.Length);
+    Equal("Ctrl+S", history.Tokens.Single().Value);
+    Equal(6, history.Length);
+}
+
+static void FormatChordsWithoutSpaces()
+{
+    Equal(
+        "Ctrl+Shift",
+        KeyLabelFormatter.FormatChord(new HashSet<int> { 0x11, 0x10 }, 0x10));
+    Equal(
+        "Ctrl+Shift+S",
+        KeyLabelFormatter.FormatChord(new HashSet<int> { 0x11, 0x10, 0x53 }, 0x53));
+}
+
+static void CountRepeatedSpecialKeys()
+{
+    var history = new DisplayHistory(30);
+
+    history.AddSpecial("Backspace");
+    Equal("Backspace", history.Tokens.Single().Value);
+
+    history.AddSpecial("Backspace");
+    Equal("Backspace*2", history.Tokens.Single().Value);
+
+    history.AddSpecial("Backspace");
+    Equal("Backspace*3", history.Tokens.Single().Value);
+}
+
+static void DoNotCombineSeparatedSpecialKeys()
+{
+    var history = new DisplayHistory(40);
+    history.AddSpecial("Backspace");
+    history.AddSpecial("Enter");
+    history.AddSpecial("Backspace");
+
+    Equal(3, history.Tokens.Count);
+    Equal("Backspace", history.Tokens[0].Value);
+    Equal("Enter", history.Tokens[1].Value);
+    Equal("Backspace", history.Tokens[2].Value);
+}
+
+static void PreserveRepeatsWhenReplacingPreviews()
+{
+    var history = new DisplayHistory(40);
+    history.AddSpecial("Ctrl");
+    history.AddSpecial("Ctrl");
+    history.AddSpecial("Ctrl+Shift", replaceLastSpecial: true);
+
+    Equal(2, history.Tokens.Count);
+    Equal("Ctrl", history.Tokens[0].Value);
+    Equal("Ctrl+Shift", history.Tokens[1].Value);
 }
 
 static void TranslateEnglishUs()

@@ -27,11 +27,46 @@ internal sealed class DisplayHistory
 
         if (replaceLastSpecial && Tokens.Count > 0 && Tokens[^1].IsSpecial)
         {
-            Tokens.RemoveAt(Tokens.Count - 1);
+            RemoveLastSpecialOccurrence();
         }
 
-        Tokens.Add(new DisplayToken(label, IsSpecial: true));
+        if (Tokens.Count > 0
+            && Tokens[^1].IsSpecial
+            && Tokens[^1].SpecialLabel == label)
+        {
+            var lastToken = Tokens[^1];
+            var repeatCount = lastToken.RepeatCount + 1;
+            Tokens[^1] = lastToken with
+            {
+                Value = $"{label}*{repeatCount + 1}",
+                RepeatCount = repeatCount
+            };
+        }
+        else
+        {
+            Tokens.Add(new DisplayToken(label, IsSpecial: true, SpecialLabel: label));
+        }
+
         Trim();
+    }
+
+    private void RemoveLastSpecialOccurrence()
+    {
+        var lastToken = Tokens[^1];
+        if (lastToken.RepeatCount == 0)
+        {
+            Tokens.RemoveAt(Tokens.Count - 1);
+            return;
+        }
+
+        var repeatCount = lastToken.RepeatCount - 1;
+        Tokens[^1] = lastToken with
+        {
+            Value = repeatCount == 0
+                ? lastToken.SpecialLabel!
+                : $"{lastToken.SpecialLabel}*{repeatCount + 1}",
+            RepeatCount = repeatCount
+        };
     }
 
     internal void AppendText(string text)
