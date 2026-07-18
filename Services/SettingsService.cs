@@ -22,7 +22,7 @@ internal sealed record AppSettings
     {
         return this with
         {
-            MaxHistoryLength = Math.Clamp(MaxHistoryLength, 0, 200),
+            MaxHistoryLength = Math.Max(1, MaxHistoryLength),
             BubblePosition = BubblePosition?.Trim().ToLowerInvariant() switch
             {
                 "left" => "left",
@@ -73,6 +73,26 @@ internal static class SettingsService
         catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or JsonException)
         {
             return defaults;
+        }
+    }
+
+    internal static void Save(AppSettings settings)
+    {
+        try
+        {
+            var directory = Path.GetDirectoryName(SettingsPath);
+            if (!string.IsNullOrEmpty(directory))
+            {
+                Directory.CreateDirectory(directory);
+            }
+
+            File.WriteAllText(
+                SettingsPath,
+                JsonSerializer.Serialize(settings.Normalize(), JsonOptions));
+        }
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+        {
+            // Keep the live setting even when it cannot be persisted.
         }
     }
 }

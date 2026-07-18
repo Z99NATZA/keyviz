@@ -12,7 +12,7 @@ namespace KeyViz;
 public partial class MainWindow : Window
 {
     private readonly HashSet<int> _pressedKeys = [];
-    private readonly string _bubblePosition;
+    private string _bubblePosition;
     private readonly DisplayHistory _history;
     private readonly DispatcherTimer _hideTimer;
     private HwndSource? _windowSource;
@@ -79,6 +79,23 @@ public partial class MainWindow : Window
             DisplayPanel.BeginAnimation(OpacityProperty, null);
             DisplayPanel.Opacity = 0;
         }
+    }
+
+    internal void SetMaxHistoryLength(int maxLength)
+    {
+        _history.SetMaxLength(maxLength);
+        if (!_history.CanStoreTokens)
+        {
+            _hasModifierPreview = false;
+        }
+
+        RefreshDisplay();
+    }
+
+    internal void SetBubblePosition(string position)
+    {
+        _bubblePosition = position;
+        PositionOverlay();
     }
 
     protected override void OnClosed(EventArgs e)
@@ -204,6 +221,7 @@ public partial class MainWindow : Window
     {
         if (_history.Tokens.Count == 0)
         {
+            _hideTimer.Stop();
             DisplayPanel.BeginAnimation(OpacityProperty, null);
             DisplayPanel.Opacity = 0;
             return;

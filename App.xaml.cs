@@ -7,6 +7,7 @@ namespace KeyViz;
 
 public partial class App : System.Windows.Application
 {
+    private AppSettings _settings = new();
     private NotifyIcon? _trayIcon;
     private ControlWindow? _controls;
     private MainWindow? _overlay;
@@ -20,9 +21,9 @@ public partial class App : System.Windows.Application
             Console.CancelKeyPress += ConsoleOnCancelKeyPress;
         }
 
-        var settings = SettingsService.Load();
+        _settings = SettingsService.Load();
 
-        _overlay = new MainWindow(settings);
+        _overlay = new MainWindow(_settings);
         MainWindow = _overlay;
         _overlay.Show();
 
@@ -31,19 +32,21 @@ public partial class App : System.Windows.Application
             return;
         }
 
-        if (settings.ShowControls)
+        if (_settings.ShowControls)
         {
-            _controls = new ControlWindow();
-            _controls.OverlayVisibilityRequested += SetOverlayEnabled;
-            _controls.SetOverlayState(true);
-            _controls.Show();
+            ShowControls();
         }
 
         var menu = new ContextMenuStrip();
-        menu.Items.Add("Show", null, (_, _) =>
+        menu.Items.Add("Show keystrokes", null, (_, _) =>
             Dispatcher.Invoke(() => SetOverlayEnabled(true)));
-        menu.Items.Add("Hide", null, (_, _) =>
+        menu.Items.Add("Hide keystrokes", null, (_, _) =>
             Dispatcher.Invoke(() => SetOverlayEnabled(false)));
+        menu.Items.Add(new ToolStripSeparator());
+        menu.Items.Add("Show Keyviz button", null, (_, _) =>
+            Dispatcher.Invoke(() => SetControlsVisible(true)));
+        menu.Items.Add("Hide Keyviz button", null, (_, _) =>
+            Dispatcher.Invoke(() => SetControlsVisible(false)));
         menu.Items.Add(new ToolStripSeparator());
         menu.Items.Add("Exit", null, (_, _) => Dispatcher.Invoke(() => Shutdown()));
 
@@ -76,6 +79,53 @@ public partial class App : System.Windows.Application
     {
         _overlay?.SetOverlayEnabled(enabled);
         _controls?.SetOverlayState(enabled);
+    }
+
+    private void SetMaxHistoryLength(int maxLength)
+    {
+        _settings = _settings with { MaxHistoryLength = maxLength };
+        _overlay?.SetMaxHistoryLength(_settings.MaxHistoryLength);
+        SettingsService.Save(_settings);
+    }
+
+    private void SetControlsVisible(bool visible)
+    {
+        _settings = _settings with { ShowControls = visible };
+
+        if (visible)
+        {
+            ShowControls();
+        }
+        else
+        {
+            _controls?.SetControlsState(false);
+            _controls?.Hide();
+        }
+
+        SettingsService.Save(_settings);
+    }
+
+    private void ShowControls()
+    {
+        if (_controls is null)
+        {
+            _controls = new ControlWindow(_settings);
+            _controls.OverlayVisibilityRequested += SetOverlayEnabled;
+            _controls.MaxHistoryLengthRequested += SetMaxHistoryLength;
+            _controls.BubblePositionRequested += SetBubblePosition;
+            _controls.ControlsVisibilityRequested += SetControlsVisible;
+        }
+
+        _controls.SetOverlayState(_overlay?.IsOverlayEnabled ?? false);
+        _controls.SetControlsState(true);
+        _controls.Show();
+    }
+
+    private void SetBubblePosition(string position)
+    {
+        _settings = (_settings with { BubblePosition = position }).Normalize();
+        _overlay?.SetBubblePosition(_settings.BubblePosition);
+        SettingsService.Save(_settings);
     }
 
     private void ConsoleOnCancelKeyPress(object? sender, ConsoleCancelEventArgs e)

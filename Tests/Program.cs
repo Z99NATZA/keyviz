@@ -9,6 +9,7 @@ var tests = new (string Name, Action Run)[]
     ("preserves surrogate pairs", PreserveSurrogatePairs),
     ("counts text and special labels under one limit", CountCombinedHistory),
     ("trims special labels atomically", TrimSpecialLabelsAtomically),
+    ("updates the history limit", UpdateHistoryLimit),
     ("replaces modifier previews", ReplaceModifierPreviews),
     ("formats chords without spaces", FormatChordsWithoutSpaces),
     ("counts repeated special keys", CountRepeatedSpecialKeys),
@@ -88,6 +89,19 @@ static void TrimSpecialLabelsAtomically()
     Equal(2, history.Length);
     Equal(1, history.Tokens.Count);
     Equal("ab", history.Tokens.Single().Value);
+}
+
+static void UpdateHistoryLimit()
+{
+    var history = new DisplayHistory(10);
+    history.AppendText("abcdef");
+
+    history.SetMaxLength(3);
+    Equal("def", history.Tokens.Single().Value);
+
+    history.SetMaxLength(0);
+    Equal("f", history.Tokens.Single().Value);
+    Equal(true, history.CanStoreTokens);
 }
 
 static void ReplaceModifierPreviews()

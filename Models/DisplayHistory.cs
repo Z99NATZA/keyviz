@@ -5,11 +5,11 @@ namespace KeyViz.Models;
 
 internal sealed class DisplayHistory
 {
-    private readonly int _maxLength;
+    private int _maxLength;
 
     internal DisplayHistory(int maxLength)
     {
-        _maxLength = maxLength;
+        _maxLength = Math.Max(1, maxLength);
     }
 
     internal ObservableCollection<DisplayToken> Tokens { get; } = [];
@@ -17,6 +17,12 @@ internal sealed class DisplayHistory
     internal bool CanStoreTokens => _maxLength > 0;
 
     internal int Length => Tokens.Sum(token => UnicodeText.CountCodePoints(token.Value));
+
+    internal void SetMaxLength(int maxLength)
+    {
+        _maxLength = Math.Max(1, maxLength);
+        Trim();
+    }
 
     internal void AddSpecial(string label, bool replaceLastSpecial = false)
     {
