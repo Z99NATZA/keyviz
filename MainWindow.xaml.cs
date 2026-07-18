@@ -29,6 +29,7 @@ public partial class MainWindow : Window
 
         _bubblePosition = settings.BubblePosition;
         _history = new DisplayHistory(settings.MaxHistoryLength);
+        SetOverlayWidthLimit();
 
         _hideTimer = new DispatcherTimer
         {
@@ -232,7 +233,13 @@ public partial class MainWindow : Window
 
         _hideTimer.Stop();
         _hideTimer.Start();
-        Dispatcher.BeginInvoke(() => TokenScroller.ScrollToRightEnd(), DispatcherPriority.Loaded);
+        Dispatcher.BeginInvoke(
+            () =>
+            {
+                PositionOverlay();
+                TokenScroller.ScrollToRightEnd();
+            },
+            DispatcherPriority.Loaded);
     }
 
     private void HideTimerOnTick(object? sender, EventArgs e)
@@ -269,6 +276,14 @@ public partial class MainWindow : Window
 
         Left = Math.Clamp(desiredLeft, minimumLeft, maximumLeft);
         Top = workArea.Bottom - ActualHeight - edgeMargin;
+    }
+
+    private void SetOverlayWidthLimit()
+    {
+        const double edgeMargin = 32;
+        var availableWidth = Math.Max(1, SystemParameters.WorkArea.Width - (edgeMargin * 2));
+        MaxWidth = availableWidth;
+        DisplayPanel.MaxWidth = availableWidth;
     }
 
     private void ApplyOverlayWindowStyles()

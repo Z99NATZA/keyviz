@@ -30,7 +30,7 @@ hello ที่ Ctrl+S next
 
 Special tokens use the same typography as ordinary text and are distinguished by green text. Token type affects presentation only, not history-length accounting.
 
-When the content exceeds the bubble width, KeyViz scrolls to the newest token without wrapping to another line.
+The bubble expands with its content up to the available work-area width. Only content longer than the screen can display is scrolled to the newest token, without wrapping to another line.
 
 ### `showControls`
 

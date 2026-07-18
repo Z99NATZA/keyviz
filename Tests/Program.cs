@@ -93,6 +93,13 @@ static void TrimSpecialLabelsAtomically()
 
 static void UpdateHistoryLimit()
 {
+    var expandedHistory = new DisplayHistory(3);
+    expandedHistory.AppendText("abc");
+    expandedHistory.SetMaxLength(100);
+    expandedHistory.AppendText(new string('x', 97));
+
+    Equal(100, expandedHistory.Length);
+
     var history = new DisplayHistory(10);
     history.AppendText("abcdef");
 
