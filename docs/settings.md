@@ -1,12 +1,14 @@
 # Settings
 
-KeyViz reads the following file when the application starts:
+## Location and lifecycle
 
 ```text
 %LocalAppData%\KeyViz\settings.json
 ```
 
-If the file does not exist, KeyViz creates it automatically with default values. Restart KeyViz after editing the file directly for changes to take effect. When `showControls` is enabled, the compact `Keyviz` button provides live controls for history length, bubble position, and keystroke visibility. Changes made there are saved automatically.
+KeyViz creates this file with defaults when it does not exist. Changes made through the `Keyviz` property panel or System Tray are applied immediately and saved automatically. Changes made directly in JSON require an application restart.
+
+If the file is unreadable or contains invalid JSON, KeyViz uses defaults without overwriting it.
 
 ## Format
 
@@ -18,29 +20,43 @@ If the file does not exist, KeyViz creates it automatically with default values.
 }
 ```
 
-### `maxHistoryLength`
+| JSON field | UI control | Default | Accepted values |
+| --- | --- | --- | --- |
+| `maxHistoryLength` | **History limit** | `20` | Integer from `1` to `2,147,483,647` |
+| `showControls` | **Keyviz button** | `true` | `true` or `false` |
+| `bubblePosition` | **Position** | `"center"` | `"left"`, `"center"`, or `"right"` |
 
-The maximum combined Unicode code-point count retained across text and special tokens. The minimum is `1`; there is no practical UI maximum beyond the underlying 32-bit integer limit. Very large histories can increase memory usage and rendering work. The property panel's `−` and `+` buttons accelerate while held. `ที่` counts as 3, `Shift` counts as 5, `Ctrl+S` counts as 6, and a blank inserted by Space counts as 1. Text is trimmed by code point, while special tokens are removed as complete labels.
+## `maxHistoryLength`
 
-Text and special tokens are rendered in event order on one line:
+This is the combined Unicode code-point count retained across displayed text and special-token labels. Examples:
 
-```text
-hello ที่ Ctrl+S next
-```
+| Display value | Count |
+| --- | ---: |
+| `ที่` | 3 |
+| `Shift` | 5 |
+| `Ctrl+S` | 6 |
+| Space | 1 |
 
-Special tokens use the same typography as ordinary text and are distinguished by green text. Token type affects presentation only, not history-length accounting.
+Text is trimmed one code point at a time. Special tokens are removed whole. Very large limits can increase memory use and rendering work.
 
-The bubble expands with its content up to the available work-area width. Only content longer than the screen can display is scrolled to the newest token, without wrapping to another line.
+The History limit buttons accelerate while held:
 
-### `showControls`
+- Under 1 second: step 1
+- 1–2.5 seconds: step 5
+- 2.5–5 seconds: step 25
+- Over 5 seconds: step 100
 
-- `true` shows the lower-left `Keyviz` button. Pressing it expands the property panel upward while keeping the button in place.
-- `false` hides the button. The overlay and Exit action remain available from the System Tray.
+Values below 1 are normalized to 1.
 
-The property panel can hide the controls immediately. Use **Show Keyviz button** in the System Tray menu to restore it. Both the property panel and System Tray actions update this setting automatically.
+## `showControls`
 
-### `bubblePosition`
+- `true` shows the lower-left `Keyviz` button.
+- `false` hides the button without disabling the keystroke overlay or System Tray.
 
-Controls the horizontal bubble position. Supported values are `"left"`, `"center"`, and `"right"`, which place the bubble center at approximately 25%, 50%, and 75% of the work area. KeyViz keeps at least 32 pixels between the overlay window and the horizontal work-area edges. Unsupported values fall back to `"center"`.
+Use **Show Keyviz button** in the System Tray to restore a hidden button.
 
-Numeric values below the supported minimum are clamped. If the file cannot be read or contains invalid JSON, KeyViz uses defaults without overwriting the existing file.
+## `bubblePosition`
+
+The value places the bubble center at approximately 25% (`left`), 50% (`center`), or 75% (`right`) of the primary work area. The window remains at least 32 pixels from horizontal work-area edges. Unsupported values normalize to `center`.
+
+The bubble grows to the available work-area width before scrolling to its newest content.

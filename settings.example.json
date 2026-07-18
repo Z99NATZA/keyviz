@@ -1,5 +1,5 @@
 {
   "maxHistoryLength": 20,
-  "showControls": false,
+  "showControls": true,
   "bubblePosition": "center"
 }

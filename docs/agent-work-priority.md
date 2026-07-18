@@ -1,75 +1,55 @@
-# Agent Work Priority
+# Agent Work Guide
 
-Read this file before starting a scoped task in KeyViz. It identifies the active
-priority and routes work to the current documentation and owning code.
+## Current priority
 
-## Active Scope
+No active priority. The repository is ready for the next scoped task.
 
-No active priority.
+## Start here
 
-Status: Ready for the next scoped task.
-
-## Required Read Order
-
-For every task:
-
-1. Read `docs/architecture.md` for the current input, token, overlay, and
-   application boundaries.
-2. Read `docs/development.md` for the project structure and verification steps.
+1. Read `docs/architecture.md` for system boundaries, ownership, and invariants.
+2. Read `docs/development.md` for commands, project paths, and verification.
 3. Inspect the owning implementation before changing behavior.
+4. Read only the task-specific references below.
 
-Then read only the documents relevant to the task:
+## Task routing
 
-- Settings or history limits: `docs/settings.md`, `settings.example.json`,
-  `Services/SettingsService.cs`, `Models/DisplayHistory.cs`, and
-  `Services/UnicodeText.cs`.
-- Overlay rendering or colors: `docs/theme.md`, `App.xaml`, and
-  `MainWindow.xaml`.
-- Keyboard capture or key translation: `Native/WindowsApi.cs`,
-  `Services/RawKeyboardInput.cs`, `Services/KeyboardTextTranslator.cs`,
-  `Services/KeyLabelFormatter.cs`, and `MainWindow.xaml.cs`.
-- Application lifecycle, controls, or tray behavior: `App.xaml.cs` and
-  `ControlWindow.xaml(.cs)`.
+| Task | Read and inspect |
+| --- | --- |
+| Settings or history | `docs/settings.md`, `settings.example.json`, `Services/SettingsService.cs`, `Models/DisplayHistory.cs`, `Services/UnicodeText.cs` |
+| Overlay layout or theme | `docs/theme.md`, `App.xaml`, `MainWindow.xaml(.cs)` |
+| Keyboard capture or translation | `Native/WindowsApi.cs`, `Services/RawKeyboardInput.cs`, `Services/KeyboardTextTranslator.cs`, `Services/KeyLabelFormatter.cs`, `MainWindow.xaml.cs` |
+| Keyviz controls or System Tray | `App.xaml.cs`, `ControlWindow.xaml(.cs)` |
+| Tests or release verification | `docs/development.md`, `Tests/`, `KeyViz.csproj` |
 
-## Required Outcome
+## Non-negotiable invariants
 
-- Add the concrete, observable outcome for the next task here.
-- Include the relevant automated and manual verification required to consider
-  the task complete.
+- Keyboard input must not be blocked, modified, injected, logged, persisted, or transmitted.
+- Overlay and control windows must not take focus; the overlay must remain click-through.
+- Text and special tokens must remain in event order.
+- History length counts Unicode code points across both token types.
+- Text trims by code point; special tokens trim atomically.
+- Space remains ordinary text. Special tokens use the normal typography and green foreground.
+- Existing user changes in the worktree must be preserved.
 
-## Notes
+## Definition of done
 
-- This file is a reusable task template. Do not delete, collapse, or rewrite the
-  template structure when a priority is completed.
-- When a priority is completed, clear only task-specific content from
-  `Active Scope`, `Required Read Order`, and `Required Outcome`; keep the
-  headings, default placeholder text, and these notes for the next agent.
-- Keep this file short and task-focused.
-- Treat the implementation as the source of truth. Inspect the owning code
-  before adding or changing a behavior claim in `docs/`.
-- Keep `docs/architecture.md`, `docs/settings.md`, `docs/theme.md`, and
-  `docs/development.md` limited to current behavior. Do not add migration
-  narrative, replacement history, or superseded behavior to these documents.
-- Treat files under `docs/release/` as release records, not as sources of current
-  behavior.
-- Preserve the overlay guarantees: keyboard input must not be blocked or
-  modified, and overlay windows must not take focus or intercept mouse input.
-- Preserve the privacy boundary: keyboard events and display tokens stay in
-  process memory and are not logged, persisted, or sent over a network.
-- Keep text and special tokens in event order. `IsSpecial` controls presentation
-  and atomic trimming; `maxHistoryLength` counts the Unicode code points of both
-  token types under one limit.
-- Plain Space is an ordinary blank character. Special tokens use the same
-  typography as text, render in green, and are removed as complete labels when
-  history is trimmed.
-- Update `settings.example.json` and `docs/settings.md` whenever the settings
-  contract changes. Update `docs/theme.md` whenever shared visual resources or
-  rendering rules change.
-- Run `dotnet format --verify-no-changes`, the dependency-free automated test
-  runner, and `dotnet build -c Release` for every code change, then perform the
-  relevant manual checks from `docs/development.md`. Run the documented publish
-  command when distribution behavior changes.
-- Do not introduce a backend, network communication, persistent key logging, or
-  an external dependency unless the active scope explicitly requires it.
-- Clear completed task details and restore the default placeholders so this
-  file is ready for the next scoped task.
+For code changes:
+
+```powershell
+dotnet format --verify-no-changes
+dotnet build -c Release
+dotnet run --project Tests\KeyViz.Tests.csproj -c Release
+```
+
+Also run the relevant manual checks from `docs/development.md`. Run the publish command only when distribution behavior changes.
+
+For documentation changes, run `git diff --check` and verify every documented path, command, setting, and UI label against the implementation.
+
+## Documentation policy
+
+- Treat implementation as the source of truth.
+- Keep `architecture.md`, `development.md`, `settings.md`, and `theme.md` limited to current behavior.
+- Keep task history out of current documentation.
+- Never edit `docs/release/` while cleaning current documentation; release files are historical records.
+- Update `settings.example.json` with settings-contract changes and `theme.md` with shared visual-resource changes.
+- Do not add a backend, network communication, persistent key logging, or external dependency unless explicitly requested.

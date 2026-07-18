@@ -1,26 +1,40 @@
 # KeyViz (Key Visualizer)
 
+### Show keystrokes
+
+![Show keystrokes](docs/images/show-keystrokes.png)
+
+### Keyviz settings
+
+![Keyviz settings](docs/images/keyviz-settings.png)
+
+### System tray
+
+![System tray](docs/images/system-tray.png)
+
 ## ติดตั้งและรัน
 
 รองรับ Windows 10/11 และต้องติดตั้ง [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0)
 
 ```bash
-# เปิด Command Prompt, PowerShell หรือ terminal อื่นที่โฟลเดอร์โปรเจกต์ แล้วรัน
+# รันโปรแกรม
 
 dotnet restore
 dotnet build
 dotnet run
 
-# โปรแกรมจะอยู่ใน System Tray คลิกขวาที่ไอคอนเพื่อซ่อน แสดง หรือปิดโปรแกรม
-# สร้างไฟล์สำหรับนำไปใช้เครื่องอื่น
+# คลิกขวาที่ไอคอน System Tray เพื่อแสดง/ซ่อน keystrokes,
+# แสดง/ซ่อนปุ่ม Keyviz หรือปิดโปรแกรม
+
+# Publish เป็นไฟล์เดียวสำหรับนำไปใช้เครื่องอื่น
 
 dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true
 
-# ไฟล์ที่ publish แล้วอยู่ที่
+# ไฟล์ที่ publish แล้ว
 
 bin\Release\net10.0-windows\win-x64\publish\KeyViz.exe
 
-# คัดลอก `KeyViz.exe` ไปยังเครื่อง Windows 10/11 แล้วเปิดใช้งานได้ทันที ไม่ต้องติดตั้ง .NET เพิ่ม
+# นำ KeyViz.exe ไปเปิดบน Windows 10/11 ได้โดยไม่ต้องติดตั้ง .NET เพิ่ม
 ```
 
 ---
@@ -30,20 +44,22 @@ bin\Release\net10.0-windows\win-x64\publish\KeyViz.exe
 KeyViz supports Windows 10/11 and requires the [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0).
 
 ```bash
-# Open Command Prompt, PowerShell, or another terminal in the project directory, then run
+# Run the application
 
 dotnet restore
 dotnet build
 dotnet run
 
-# KeyViz runs in the System Tray. Right-click its icon to show, hide, or exit the application.
-# Build a file for use on another machine
+# Right-click the System Tray icon to show or hide keystrokes,
+# show or hide the Keyviz button, or exit the application.
+
+# Publish a single file for another machine
 
 dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true
 
-# The published file is located at
+# Published file
 
 bin\Release\net10.0-windows\win-x64\publish\KeyViz.exe
 
-# Copy `KeyViz.exe` to a Windows 10/11 machine and run it directly. No additional .NET installation is required.
+# Run KeyViz.exe on Windows 10/11 without installing .NET.
 ```

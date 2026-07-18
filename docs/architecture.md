@@ -1,71 +1,74 @@
 # Architecture
 
-## Overview
+## System boundary
 
-KeyViz is a WPF desktop application with a transparent overlay and a System Tray icon. It has no backend, database, or network connection.
+KeyViz is a Windows-only WPF application. It captures keyboard events through Windows Raw Input, converts them into display tokens, and renders a click-through overlay. It has no backend, database, analytics, or network connection.
 
-Main input and rendering flow:
+Typed content exists only in process memory. Settings are the only application data written to disk.
+
+## Input flow
 
 ```text
 Windows keyboard event
-        ↓
-Windows Raw Input (`WM_INPUT`)
-        ↓
+        ↓ WM_INPUT
 RawKeyboardInput
-        ↓
+        ↓ KeyboardInputEvent
 MainWindow
-        ├─ KeyboardTextTranslator → foreground keyboard layout → Unicode text
-        └─ KeyLabelFormatter → special-key and shortcut labels
+        ├─ KeyboardTextTranslator → Unicode text from the active layout
+        └─ KeyLabelFormatter      → special-key or shortcut label
         ↓
-Ordered display tokens (`Text` / `Special`)
+DisplayHistory → ordered Text/Special tokens
         ↓
-WPF overlay (`MainWindow`)
+MainWindow → WPF keystroke bubble
 ```
 
-## Components
+## Component ownership
 
-### `RawKeyboardInput`
+| Component | Responsibility |
+| --- | --- |
+| `App` | Application lifecycle, shared live settings, ControlWindow creation, and System Tray actions |
+| `RawKeyboardInput` | Registers `RIDEV_INPUTSINK` and converts `WM_INPUT` into keyboard events without blocking normal input |
+| `KeyboardTextTranslator` | Resolves the focused control's keyboard layout and translates printable keys with `ToUnicodeEx` |
+| `KeyLabelFormatter` | Names non-printable keys and formats shortcuts such as `Ctrl+Shift+S` |
+| `DisplayHistory` | Stores ordered tokens, applies the Unicode code-point limit, removes text on Backspace, and groups repeated special keys |
+| `MainWindow` | Receives input, updates history, and renders the non-activating click-through bubble |
+| `ControlWindow` | Hosts the fixed `Keyviz` button and its upward-expanding live property panel |
+| `SettingsService` | Loads, normalizes, creates, and saves `settings.json` |
 
-Registers a keyboard device through Win32 Raw Input with `RIDEV_INPUTSINK`, allowing the window to receive `WM_INPUT` while another application is in the foreground. KeyViz reads virtual keys, scan codes, and key-down/key-up state without modifying or blocking input delivered to other applications.
+## Display behavior
 
-### `KeyboardTextTranslator`
+- Printable input follows the direct keyboard layout of the active application.
+- Space is stored as an ordinary blank character.
+- Shortcuts have no spaces around `+`, for example `Ctrl+Shift+S`.
+- Consecutive identical special keys are grouped by total presses: `Backspace`, `Backspace*2`, `Backspace*3`.
+- Text and special tokens stay in event order on one line. Special tokens render in green.
+- Backspace removes one Unicode code point from the newest text token and is then recorded as a special token.
+- The bubble grows with its content up to the available work-area width, then scrolls to the newest token.
+- The bubble stays 32 pixels above the work-area bottom and fades after three seconds without a key-down event.
 
-Resolves the input locale of the caret or keyboard-focused control's GUI thread for each printable key and calls `ToUnicodeEx` with the Raw Input virtual key, scan code, and current modifier/toggle state. The top-level foreground window and KeyViz thread provide fallbacks when Windows does not expose a focused control. Resolving the control thread is required for hosted editors such as modern Notepad, where the top-level window and text control can use different input locales. Translation uses the non-mutating keyboard-state flag available on supported Windows versions. This allows English US, Thai Kedmanee, Thai Pattachote, and other direct keyboard layouts to follow the input language selected in the active application.
+`MainWindow` uses these extended window styles:
 
-### `KeyLabelFormatter`
+- `WS_EX_TRANSPARENT` — mouse input passes through
+- `WS_EX_NOACTIVATE` — the overlay does not take focus
+- `WS_EX_TOOLWINDOW` — the overlay does not appear as a normal taskbar window
 
-Converts non-printable virtual keys into readable labels and combines active modifiers into shortcuts such as `Ctrl+Shift+S`. Printable text conversion belongs to `KeyboardTextTranslator`.
+## Control and tray behavior
 
-### `DisplayHistory`
+The lower-left `Keyviz` button stays in place while its property panel expands upward. The panel applies **Show keystrokes**, **Keyviz button**, **History limit**, and **Position** immediately and saves persistent values automatically.
 
-Stores ordered text and special tokens, appends translated Unicode strings, removes the last Unicode code point from the newest text token on Backspace, and applies the shared history-length limit. Text can be trimmed by code point; special labels are removed atomically.
+The System Tray menu provides **Show/Hide keystrokes**, **Show/Hide Keyviz button**, and **Exit**. Double-clicking the tray icon toggles keystroke visibility.
 
-### `MainWindow`
+## Invariants
 
-A transparent WPF overlay that stays above ordinary windows and does not accept mouse input or focus. It uses the following extended window styles:
+- Never block, modify, inject, log, or transmit keyboard input.
+- Keep text and special tokens in their original event order.
+- Count Unicode code points, not UTF-16 code units, for the history limit.
+- Trim text by code point and remove special tokens atomically.
+- Keep overlay and control windows non-activating.
 
-- `WS_EX_TRANSPARENT`
-- `WS_EX_NOACTIVATE`
-- `WS_EX_TOOLWINDOW`
+## Known limitations
 
-Text and special keys are rendered on one line, for example `hello ที่ Ctrl+S`. Pressing Space inserts an ordinary blank character. Consecutive copies of the same special key are collapsed into a total press counter such as `Backspace*2`, `Backspace*3`, and so on. Special tokens use the same typography as ordinary text but are colored green. Thai-capable fallback fonts allow vowels and tone marks to compose in the same text run. `maxHistoryLength` limits the combined Unicode code-point count across both token types, so `ที่` contributes 3, `Shift` contributes 5, and `Ctrl+S` contributes 6. The horizontal position is read from `settings.json`; the bubble's bottom edge stays 32 pixels above the work-area bottom, aligned with the Show/Hide controls. When the content exceeds the bubble width, the view scrolls to the newest token. The panel fades after three seconds without a key-down event.
-
-### `ControlWindow`
-
-A small lower-left control window positioned 32 pixels from the work-area edges. It provides Show and Hide buttons for `MainWindow` without taking foreground focus from the active application.
-
-### `App`
-
-Owns application lifecycle, root dark-theme color resources, shared state between `MainWindow` and `ControlWindow`, and the System Tray icon. The overlay can be shown or hidden through either the on-screen controls or the tray menu. Exit remains available from the tray menu.
-
-### `SettingsService`
-
-Reads `%LocalAppData%\KeyViz\settings.json` at startup and creates it with defaults when it does not exist. Invalid files fall back to defaults, and numeric values outside supported ranges are clamped.
-
-## Data Handling And Limitations
-
-- Key events and display tokens are processed in memory only; typed content is not logged or sent over the network.
-- Secure Desktop surfaces such as UAC prompts are not captured or overlaid.
-- Exclusive-fullscreen games may appear above the overlay; borderless windowed mode is more reliable.
-- The primary work area is used for placement. Monitor selection and vertical positioning are not configurable.
-- Direct keyboard layouts use the foreground application's active input locale. Dead-key composition and IME composition such as Chinese, Japanese, and Korean input are not supported.
+- Secure Desktop surfaces such as UAC prompts are not captured.
+- Exclusive-fullscreen applications may render above the overlay; borderless windowed mode is more reliable.
+- Placement uses the primary work area. Monitor selection and vertical position are not configurable.
+- Direct keyboard layouts are supported; dead-key and IME composition such as Chinese, Japanese, and Korean are not.

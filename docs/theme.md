@@ -1,33 +1,32 @@
 # Theme
 
-KeyViz has one dark theme. Its palette and surface hierarchy are based on wfchat, but KeyViz does not implement a full theme framework.
+KeyViz has one dark theme. Shared colors live in `App.xaml`; component dimensions and local control styles live with their window XAML.
 
-Shared colors live in `App.xaml` under semantic resource keys:
+## Shared resources
 
-| Resource | Value | Purpose |
+| Resource | Value | Use |
 | --- | --- | --- |
-| `Theme.AppBackgroundBrush` | `#282c33` | Base application color |
-| `Theme.AppPanelBrush` | `rgb(59 65 77 / 0.88)` | Overlay and control-panel surfaces |
-| `Theme.AppSoftBrush` | `rgb(47 52 62 / 0.72)` | Ordinary control surfaces |
+| `Theme.AppBackgroundBrush` | `#282c33` | Base color |
+| `Theme.AppPanelBrush` | `rgb(59 65 77 / 0.88)` | Bubble and property-panel surfaces |
+| `Theme.AppSoftBrush` | `rgb(47 52 62 / 0.72)` | Ordinary controls |
 | `Theme.AppTextBrush` | `#f2f5f8` | Primary text |
 | `Theme.SpecialTextBrush` | `#4ade80` | Special-key text |
-| `Theme.MutedTextBrush` | `#b8c0ca` | Secondary text |
+| `Theme.MutedTextBrush` | `#b8c0ca` | Labels and secondary text |
 | `Theme.AppBorderBrush` | `rgb(116 126 143 / 0.38)` | Surface borders |
-| `Theme.ActionBrush` | `#282c33` | Pressed-button background |
-| `Theme.ActionHoverBrush` | `#2f343e` | Hover and selected states |
-| `Theme.ActionBorderBrush` | `#5d6675` | Action and selected-button borders |
-| `Theme.InactiveControlBrush` | `rgb(47 52 62 / 0.4)` | Inactive-button background |
-| `Theme.InactiveBorderBrush` | `rgb(116 126 143 / 0.2)` | Inactive-button border |
-| `Theme.InactiveTextBrush` | `rgb(184 192 202 / 0.6)` | Inactive-button text |
+| `Theme.ActionBrush` | `#282c33` | Pressed controls |
+| `Theme.ActionHoverBrush` | `#2f343e` | Hovered and selected controls |
+| `Theme.ActionBorderBrush` | `#5d6675` | Hovered and selected borders |
+| `Theme.InactiveControlBrush` | `rgb(47 52 62 / 0.4)` | Inactive controls |
+| `Theme.InactiveBorderBrush` | `rgb(116 126 143 / 0.2)` | Inactive borders |
+| `Theme.InactiveTextBrush` | `rgb(184 192 202 / 0.6)` | Inactive text |
+| `Theme.ShadowColor` | `#0f172a` | Bubble and panel shadows |
 
-Component dimensions, spacing, corner radii, and states are defined directly in each window's XAML because KeyViz has a small UI surface. Add repeated colors to `App.xaml` instead of scattering them across components.
+## Rules
 
-Surface guidelines:
-
-- The overlay uses the app panel, app border, and a dark shadow.
-- Text uses a monospaced-first font stack with `Leelawadee UI`, `Tahoma`, and `Segoe UI` fallbacks for Thai glyph shaping.
-- Special keys inserted between text tokens use the same typography as primary text and are colored green.
-- Show/Hide uses one local shared button style in `ControlWindow.xaml`.
-- The active button uses the action-hover background and action border.
-- The inactive button uses lower-opacity background, border, and text colors.
-- KeyViz has no light theme or theme toggle.
+- Add reusable colors to `App.xaml`; do not duplicate color literals across windows.
+- Keep spacing, sizes, corner radii, templates, and component-only styles in the owning XAML file.
+- Use the monospaced-first overlay font stack with Thai-capable fallbacks: `Leelawadee UI`, `Tahoma`, and `Segoe UI`.
+- Render special tokens with the same typography as text and `Theme.SpecialTextBrush`.
+- Use action resources for hover, pressed, and selected states; use inactive resources for unselected states.
+- Keep the `Keyviz` launcher visually fixed while the property panel expands upward.
+- There is no light theme or theme toggle.
