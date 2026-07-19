@@ -54,10 +54,11 @@ dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=
 2. Test modifiers, Caps Lock, arrows, function keys, `Ctrl+Shift+S`, and repeated special keys such as `Backspace*2`.
 3. Type `ที่`, then press Backspace; verify the text changes through `ที`, `ท`, and empty without splitting Unicode code points incorrectly.
 4. Verify the overlay remains click-through, does not take focus, keeps tokens on one line, grows to the work-area width, and then scrolls to the latest token.
-5. Verify **Show keystrokes**, **Keyviz button**, **History limit**, and **Position** apply live and persist to `settings.json`.
-6. Hold History limit `−` and `+`; verify adjustment accelerates and never drops below 1.
-7. Hide the `Keyviz` button from its panel, restore it from the System Tray, and verify the launcher does not move while expanding.
-8. Verify every System Tray action and confirm double-click toggles keystroke visibility.
+5. Leave KeyViz running while switching among and maximizing ordinary windows such as Chrome, Notepad, and VS Code; type after each switch and verify the overlay returns above the active window without taking focus.
+6. Verify **Show keystrokes**, **Keyviz button**, **History limit**, and **Position** apply live and persist to `settings.json`.
+7. Hold History limit `−` and `+`; verify adjustment accelerates and never drops below 1.
+8. Hide the `Keyviz` button from its panel, restore it from the System Tray, and verify the launcher does not move while expanding.
+9. Verify every System Tray action and confirm double-click toggles keystroke visibility.
 
 ## Out of scope
 

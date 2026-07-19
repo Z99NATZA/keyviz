@@ -44,6 +44,7 @@ public partial class MainWindow : Window
     {
         base.OnSourceInitialized(e);
         ApplyOverlayWindowStyles();
+        ReassertTopmost();
 
         try
         {
@@ -72,7 +73,7 @@ public partial class MainWindow : Window
 
         if (enabled)
         {
-            Topmost = true;
+            ReassertTopmost();
             PositionOverlay();
         }
         else
@@ -228,6 +229,7 @@ public partial class MainWindow : Window
             return;
         }
 
+        ReassertTopmost();
         DisplayPanel.BeginAnimation(OpacityProperty, null);
         DisplayPanel.Opacity = 1;
 
@@ -294,5 +296,26 @@ public partial class MainWindow : Window
         styles |= WindowsApi.WsExNoActivate;
         styles |= WindowsApi.WsExToolWindow;
         WindowsApi.SetExtendedWindowStyle(handle, styles);
+    }
+
+    private void ReassertTopmost()
+    {
+        var handle = new WindowInteropHelper(this).Handle;
+        if (handle == IntPtr.Zero)
+        {
+            return;
+        }
+
+        _ = WindowsApi.SetWindowPos(
+            handle,
+            WindowsApi.HwndTopmost,
+            0,
+            0,
+            0,
+            0,
+            WindowsApi.SwpNoMove
+            | WindowsApi.SwpNoSize
+            | WindowsApi.SwpNoActivate
+            | WindowsApi.SwpNoOwnerZOrder);
     }
 }

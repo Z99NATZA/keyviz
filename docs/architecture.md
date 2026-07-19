@@ -45,12 +45,15 @@ MainWindow → WPF keystroke bubble
 - Backspace removes one Unicode code point from the newest text token and is then recorded as a special token.
 - The bubble grows with its content up to the available work-area width, then scrolls to the newest token.
 - The bubble stays 32 pixels above the work-area bottom and fades after three seconds without a key-down event.
+- Each display refresh reasserts the native topmost z-order without activation so ordinary application windows cannot cover the overlay after Windows reorders windows.
 
 `MainWindow` uses these extended window styles:
 
 - `WS_EX_TRANSPARENT` — mouse input passes through
 - `WS_EX_NOACTIVATE` — the overlay does not take focus
 - `WS_EX_TOOLWINDOW` — the overlay does not appear as a normal taskbar window
+
+The overlay also calls `SetWindowPos(HWND_TOPMOST)` with no-move, no-size, and no-activate flags after creating its HWND and whenever displayed content changes. This repairs native z-order drift without stealing focus from the active application.
 
 ## Control and tray behavior
 
