@@ -23,13 +23,6 @@
                 BorderThickness="1"
                 CornerRadius="12"
                 Opacity="0">
-            <Border.Effect>
-                <DropShadowEffect BlurRadius="24"
-                                  Color="{StaticResource Theme.ShadowColor}"
-                                  Direction="270"
-                                  Opacity="0.55"
-                                  ShadowDepth="8" />
-            </Border.Effect>
             <ScrollViewer x:Name="TokenScroller"
                           HorizontalScrollBarVisibility="Hidden"
                           VerticalScrollBarVisibility="Disabled">
